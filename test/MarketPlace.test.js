@@ -19,4 +19,16 @@ contract('Marketplace', (accounts) => {
             assert.equal(name, 'Dapp University Marketplace')
         })
     })
+
+    describe('products', async () => {
+        let result, productCount
+        before(async () => {
+            result = await marketplace.createProduct()
+            productCount = await marketplace.productCount()
+        })
+        it('creates products', async () =>{
+            // SUCCESS
+            assert.equal(productCount,1)            
+        })
+    })
 })

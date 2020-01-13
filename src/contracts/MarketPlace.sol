@@ -60,7 +60,7 @@ contract MarketPlace {
         // Require that the product has not been purchased already
         require(!_product.purchased);
         // Require that the buyer is not the seller
-        //require(_seller != msg.sender);
+        require(_seller != msg.sender);
         // Transfer ownership to the buyer
         _product.owner = msg.sender;
         // Mark as purchased

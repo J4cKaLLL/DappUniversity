@@ -61,7 +61,7 @@ contract('Marketplace', ([deployer, seller, buyer]) => {
             let sellerBalance
             let buyerBalance
             oldSellerBalance = await web3.eth.getBalance(seller)
-            console.log(oldSellerBalance)
+           
             oldSellerBalance = new web3.utils.BN(oldSellerBalance)            
             // SUCCESS: Buyer makes purchase
             result = await marketplace.purchaseProduct(productCount, { from: buyer, value: web3.utils.toWei('1', 'Ether')})
@@ -70,7 +70,7 @@ contract('Marketplace', ([deployer, seller, buyer]) => {
             deployerBalance = await web3.eth.getBalance(deployer)
             sellerBalance = await web3.eth.getBalance(seller)
             buyerBalance = await web3.eth.getBalance(buyer)
-            console.log(deployerBalance,sellerBalance,buyerBalance)
+            
             const event = result.logs[0].args  
             
             assert.equal(event.id.toNumber(),productCount.toNumber(),'id is correct')
@@ -82,16 +82,29 @@ contract('Marketplace', ([deployer, seller, buyer]) => {
             //check that seller received funds
             let newSellerBalance
             newSellerBalance = await web3.eth.getBalance(seller)
-            console.log(newSellerBalance)
+            
             newSellerBalance = new web3.utils.BN(newSellerBalance)
 
             let price
             price = web3.utils.toWei('1', 'Ether')
-            console.log("price = ",price)
+            
             price = new web3.utils.BN(price)
 
             const expectedBalance = oldSellerBalance.add(price)
             assert.equal(newSellerBalance.toString(),expectedBalance.toString())
+            
+            // FAILURE: Tries to buy a product that does not exist, i.e., product must have a valid id
+            await marketplace.purchaseProduct(99, { from: buyer, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;
+
+            // FAILURE: Buyer tries to buy eithout enough ether
+            await marketplace.purchaseProduct(99, { from: buyer, value: web3.utils.toWei('0.5', 'Ether')}).should.be.rejected;
+
+            // FAILURE: Deployer tries to buy the product, i.e., product can't be purchased twice
+            await marketplace.purchaseProduct(99, { from: deployer, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;
+
+            // FAILURE: buyer tries to buy again, i.e., buyer can't be the seller
+            await marketplace.purchaseProduct(99, { from: buyer, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;
+
         })
     })
 })
